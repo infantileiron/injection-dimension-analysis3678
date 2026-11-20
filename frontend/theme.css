@@ -1,0 +1,104 @@
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap');
+
+:root {
+  --paper: oklch(96% 0.018 79);
+  --ink: oklch(25% 0.024 218);
+  --muted: oklch(46% 0.041 218);
+  --panel: oklch(98% 0.012 82);
+  --line: oklch(85% 0.018 214);
+  --accent: oklch(44% 0.092 209);
+  --accent-ink: oklch(98% 0.012 82);
+  --accent-soft: oklch(91% 0.039 200);
+  --nav: oklch(27% 0.034 219);
+  --nav-ink: oklch(95% 0.016 79);
+  --display: 'Barlow Condensed', 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  --body: 'IBM Plex Sans', 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  --scale-mark: oklch(67% 0.038 204);
+  --scale-major-mark: oklch(51% 0.068 209);
+  --datum: oklch(55% 0.139 50);
+}
+
+body {
+  font-family: var(--body);
+  font-variant-numeric: tabular-nums;
+}
+
+.rail {
+  border-inline-end: 3px solid var(--datum);
+}
+
+.header,
+.hero,
+.sidebar-panel,
+.plot,
+.metrics > *,
+.table-wrap {
+  border-radius: 3px;
+  box-shadow: none;
+}
+
+.header h1,
+.hero h1 {
+  font-family: var(--display);
+  font-size: clamp(1.8rem, 3.4vw, 3.75rem);
+  line-height: 1.12;
+  letter-spacing: 0.015em;
+}
+
+.hero {
+  border-block-start: 2px solid var(--accent);
+  background:
+    repeating-linear-gradient(90deg, var(--scale-major-mark) 0 1px, transparent 1px 64px) left top / 100% 14px no-repeat,
+    repeating-linear-gradient(90deg, var(--scale-mark) 0 1px, transparent 1px 8px) left top / 100% 6px no-repeat,
+    var(--panel);
+  padding-block-start: clamp(2rem, 4vw, 3.5rem);
+}
+
+.sidebar-panel,
+.plot {
+  border-block-start: 2px solid var(--accent);
+}
+
+.metrics > * {
+  border-block-start: 2px solid var(--scale-major-mark);
+}
+
+.table-wrap {
+  border-block-start: 2px solid var(--accent);
+  overflow-x: auto;
+}
+
+.table-wrap th {
+  background-color: var(--accent-soft);
+  color: var(--ink);
+}
+
+.table-wrap td:first-child,
+.table-wrap th:first-child {
+  min-inline-size: 8rem;
+}
+
+body[data-page='results'] .table-wrap td {
+  vertical-align: top;
+}
+
+.nav-link {
+  border-radius: 2px;
+}
+
+@media (prefers-reduced-motion: no-preference) and (hover: hover) {
+  .nav-link {
+    transition: transform 160ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+
+  .nav-link:hover {
+    transform: translateX(3px);
+  }
+}
+
+@media (max-width: 767px) {
+  .rail {
+    border-inline-end: 0;
+    border-block-end: 3px solid var(--datum);
+  }
+}
