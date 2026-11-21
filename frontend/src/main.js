@@ -1,6 +1,7 @@
 import {ROLE} from './constants/enums.js';
 import {inputs} from './pages/inputs.js';
 import {login} from './pages/login.js';
+import {matching} from './pages/matching.js';
 import {overview} from './pages/overview.js';
 import {results} from './pages/results.js';
 import {runPage} from './pages/run.js';
@@ -10,7 +11,7 @@ import {workspace} from './stores/workspace.js';
 import {button, el, h, link, p} from './utils/dom.js';
 
 const app = document.getElementById('app');
-const views = {overview, inputs, run:runPage, results};
+const views = {overview, inputs, matching, run:runPage, results};
 let revision = 0;
 
 function shell(state, content) {

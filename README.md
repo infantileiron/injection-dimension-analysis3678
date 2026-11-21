@@ -14,8 +14,23 @@
 
 - 成型交班
 - 样件量测联表
+- 双台账时间窗配对
 - 分层秩次复算
 - 方向判读与补测
+
+### 双台账时间窗配对
+
+机台成型日志与卡尺量测记录各有流水号，样件号可能对不上。配对页接收两本台账 CSV（各含流水号、样件号、量测日、模具、机台、树脂批次、记录时间及各自量测列），按以下口径处理：
+
+- 按**量测日 × 模具 × 机台**分组，组内在**五分钟窗（默认 300 秒，可调 60–1800 秒）**内做一对一配对。
+- 用最小费用最大流做字典序优化：**先最大化配对件数，再最小化两侧记录总时差**。
+- 样件号一致且同组的记录直接**锚定**（确定性配对）；样件号对不上的才走时间窗。
+- 对最优解中的每条配对逐一剔除后重算：剔除后无法保持同件数、同总时差的，才是**所有最优解都包含**的配对（入算相关）；存在并列最优替代配法的边整组转**待核对**，不参与相关计算。
+- 样件号一致但时差超窗的锚定也转待核对，不自动入算。
+- 同批**补录**按流水号合并迟到记录后对完整台账**整组重配**；每次配对存为不可变快照，已发分析可回查当时的配对。
+- 结果页列出**本次入算配对（流水号溯源）**、**待核对配对**和**待核对记录**三张表。
+
+相关接口：`GET /ledgers/spec`、`GET /ledgers/template/{side}`、`GET /ledgers/sample/{side}`、`POST /ledgers/preview`、`POST /ledgers`、`POST /ledgers/{id}/supplement`、`GET /ledgers/{id}`、`GET /ledgers/snapshots/{id}`、`POST /ledgers/snapshots/{id}/runs`。
 
 
 
@@ -69,7 +84,8 @@ docker compose exec -T backend python -m scripts.seed_demo
 |---|---|
 | `frontend/src` | 原生 HTML/CSS/JS 模块，通过 Nginx ` /api/ ` 代理访问后端。改前端文件后执行 `docker compose up -d --build frontend` |
 | `backend/src` | Python 3.11、FastAPI、SQLAlchemy。修改算法后执行 `docker compose up -d --build backend worker` |
-| `backend/src/domain` | CSV 字段、可控样本、业务分析和参数元数据 |
+| `backend/src/domain` | CSV 字段、可控样本、业务分析和参数元数据；`matching.py` 为双台账时间窗配对引擎，`snapshot_analysis.py` 把稳定配对接入秩相关分析 |
+| `backend/tests` | 仅依赖标准库（服务/接口测试可使用隔离依赖）的单元与集成测试，`python -I tests/<file>.py` 运行 |
 | `backend/migrations` | 表结构说明 |
 | `worker` | 数据库任务领取、Redis 唤醒、计算、CSV 导出 |
 | `db` / `redis` | MySQL 8.0 / Redis 7 |

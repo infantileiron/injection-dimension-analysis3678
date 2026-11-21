@@ -4,8 +4,10 @@ from sqlalchemy import and_, or_, select
 from src.config.database import Session
 from src.constants.enums import Status
 from src.domain.analysis import analyze
+from src.domain.snapshot_analysis import analyze_snapshot
 from src.domain.spec import SPEC
 from src.models.jobs import Delivery, Run, Schedule
+from src.models.ledger import LedgerBatch, MatchSnapshot
 from src.models.source import Dataset
 from src.services.audit import record
 from src.utils.exports import write_report
@@ -48,15 +50,25 @@ def claim():
         job.status = Status.RUNNING
         job.attempt += 1
         job.lease_until = stamp + timedelta(minutes=3)
-        records = db.get(Dataset, job.dataset_id).rows
-        return job.id, job.attempt, records, job.params
+        if job.snapshot_id:
+            snapshot = db.get(MatchSnapshot, job.snapshot_id)
+            batch = db.get(LedgerBatch, snapshot.ledger_batch_id)
+            snapshot.result["snapshot_id"] = snapshot.id
+            records = (batch.machine_rows, batch.caliper_rows, snapshot.result)
+        else:
+            records = db.get(Dataset, job.dataset_id).rows
+        return job.id, job.attempt, records, job.params, bool(job.snapshot_id)
 
 
 def execute(lease):
-    job_id, attempt, rows, params = lease
+    job_id, attempt, records, params, from_snapshot = lease
     result = export = failure = None
     try:
-        result = analyze(rows, params)
+        if from_snapshot:
+            machine_rows, caliper_rows, snapshot_result = records
+            result = analyze_snapshot(machine_rows, caliper_rows, snapshot_result, params)
+        else:
+            result = analyze(records, params)
         export = write_report(job_id, attempt, result)
     except ValueError as error:
         failure = str(error)[:500]

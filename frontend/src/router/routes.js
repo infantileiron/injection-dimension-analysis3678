@@ -1,4 +1,4 @@
-export const pages = ['overview', 'inputs', 'run', 'results'];
+export const pages = ['overview', 'inputs', 'matching', 'run', 'results'];
 
 export function route() {
   const [page, id, offset] = location.hash.slice(1).split('/');

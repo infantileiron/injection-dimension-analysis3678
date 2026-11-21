@@ -54,7 +54,7 @@ SPEC = {
     "decision": "下一班补测决定",
     "action": "提交补测决定",
     "modes": ["按层补测", "复核量具或工艺日志", "按现行计划抽检"],
-    "pages": ["成型交班", "样件量测联表", "分层秩次复算", "方向判读与补测"],
+    "pages": ["成型交班", "样件量测联表", "双台账时间窗配对", "分层秩次复算", "方向判读与补测"],
     "fields": [
         {"key": "sample_id", "label": "样件号", "type": "string", "required": True},
         {"key": "measured_on", "label": "量测日期", "type": "date", "required": True},

@@ -52,14 +52,25 @@ export async function results(route, refresh) {
     el('select',{id:'run-picker',onChange:event=>{location.hash=`#results/${event.target.value}`;}},
       (runs.some(item=>item.id===job.id) ? runs : [job,...runs]).map(item=>el('option',{value:item.id,selected:item.id===job.id},item.name))));
   const result = job.result;
+  const snapshotBanner = result?.snapshot && el('div',{class:'snapshot-banner'},
+    pill('双台账时间窗配对','info'),
+    p(`时间窗 ${result.snapshot.window_seconds} 秒 · 分组 ${result.snapshot.group_count} · 入算配对 ${result.snapshot.confident_count} · 待核对配对 ${result.snapshot.review_pair_count} · 待核对记录 ${result.snapshot.pending_count}`,'subtle'),
+    result.snapshot.snapshot_id && link('回查当时配对','#matching',{class:'quiet',
+      onClick:async event=>{event.preventDefault();
+        const snap = await workspace.getSnapshot(result.snapshot.snapshot_id);
+        location.hash = `#matching/${snap.ledger_batch_id}?snap=${snap.id}`;}}));
   const analysis = result ? el('section',{class:'analysis','data-testid':'analysis-complete'},
     el('div',{class:'result-head'},p(job.name,'eyeline'),h(2,result.headline),p(result.note,'intro-copy'),
       el('div',{class:'actions'},pill(STATUS[job.status],job.status),download,message)),
+    snapshotBanner,
     metrics(result.metrics),
     result.charts.map(plot),
     (result.sections || []).map(item=>panel(item.title,p(item.text))),
     result.tables.map(item=>panel(item.title,table(item.columns,item.rows,{caption:item.title}))))
-    : panel(job.name,pill(STATUS[job.status],job.status),p(job.error,'feedback'),link('返回调整参数',`#run/${job.dataset_id}`,{class:'quiet'}));
+    : panel(job.name,pill(STATUS[job.status],job.status),p(job.error,'feedback'),
+      job.snapshot_id
+        ? link('返回配对页','#matching',{class:'quiet'})
+        : link('返回调整参数',`#run/${job.dataset_id}`,{class:'quiet'})));
   const inputs = spec.params.map(param=>el('div',{},el('dt',{},param.label),el('dd',{},value(job.params[param.key]))));
   return el('div',{},el('div',{class:'two-col'},el('div',{class:'wide-panel'},analysis),
     el('aside',{class:'sidebar-panel'},panel('运行来源',history,
